@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Mahasiswa;
+use App\Models\Dosen;
+use App\Models\Pengajuan;
 
 final class User extends Authenticatable
 {
@@ -38,15 +43,38 @@ final class User extends Authenticatable
         'remember_token',
     ];
 
+    /**
+     * Relasi dengan model Mahasiswa.
+     */
+    public function mahasiswa(): HasOne
+    {
+        return $this->hasOne(Mahasiswa::class);
+    }
+
+    /**
+     * Relasi dengan model Dosen.
+     */
+    public function dosen(): HasOne
+    {
+        return $this->hasOne(Dosen::class);
+    }
+
+    /**
+     * Relasi dengan model Pengajuan (pengajuan yang diproses oleh admin).
+     */
+    public function processedPengajuans(): HasMany
+    {
+        return $this->hasMany(Pengajuan::class, 'processed_by');
+    }
+
     public function getFilamentAvatarUrl(): string
     {
         if ($this->avatar_url) {
-            return asset('storage/'.$this->avatar_url);
+            return asset('storage/' . $this->avatar_url);
         }
         $hash = md5(mb_strtolower(mb_trim($this->email)));
 
-        return 'https://www.gravatar.com/avatar/'.$hash.'?d=mp&r=g&s=250';
-
+        return 'https://www.gravatar.com/avatar/' . $hash . '?d=mp&r=g&s=250';
     }
 
     public function canAccessPanel(Panel $panel): bool
