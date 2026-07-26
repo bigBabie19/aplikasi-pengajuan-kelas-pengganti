@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Jadwal;
-use App\Models\Pengajuan;
 
-class Ruangan extends Model
+final class Ruangan extends Model
 {
     protected $fillable = [
         'kode',

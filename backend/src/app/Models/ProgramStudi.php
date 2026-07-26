@@ -1,14 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Mahasiswa;
-use App\Models\Dosen;
-use App\Models\MataKuliah;
 
-class ProgramStudi extends Model
+final class ProgramStudi extends Model
 {
     protected $fillable = [
         'kode',

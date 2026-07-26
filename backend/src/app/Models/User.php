@@ -7,14 +7,11 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Mahasiswa;
-use App\Models\Dosen;
-use App\Models\Pengajuan;
 
 final class User extends Authenticatable
 {
@@ -70,11 +67,11 @@ final class User extends Authenticatable
     public function getFilamentAvatarUrl(): string
     {
         if ($this->avatar_url) {
-            return asset('storage/' . $this->avatar_url);
+            return asset('storage/'.$this->avatar_url);
         }
         $hash = md5(mb_strtolower(mb_trim($this->email)));
 
-        return 'https://www.gravatar.com/avatar/' . $hash . '?d=mp&r=g&s=250';
+        return 'https://www.gravatar.com/avatar/'.$hash.'?d=mp&r=g&s=250';
     }
 
     public function canAccessPanel(Panel $panel): bool
