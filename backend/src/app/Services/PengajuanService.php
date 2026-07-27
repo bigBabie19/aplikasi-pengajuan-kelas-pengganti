@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\PengajuanStatus;
@@ -11,15 +13,16 @@ use App\Models\Ruangan;
 use App\Models\User;
 use App\Support\Hari;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
-class PengajuanService
+final class PengajuanService
 {
   /**
    * Submit pengajuan kelas pengganti.
@@ -40,8 +43,18 @@ class PengajuanService
 
       $tanggalKelasAsal = Carbon::parse($validatedData['tanggal_kelas_asal'])->startOfDay();
       $tanggalKelasPengganti = Carbon::parse($validatedData['tanggal_kelas_pengganti'])->startOfDay();
+
+      $this->validateOriginalClassDate(
+        $jadwal,
+        $tanggalKelasAsal
+      );
+
       $jamMulai = Carbon::createFromFormat('H:i', $validatedData['jam_mulai']);
       $jamSelesai = $this->calculateEndTime($jadwal, $jamMulai);
+
+      $durasiMenit = (int) round(
+        $jadwal->jam_mulai->diffInMinutes($jadwal->jam_selesai)
+      );
 
       $this->validateRoomAvailability(
         jadwal: $jadwal,
@@ -67,7 +80,8 @@ class PengajuanService
         $tanggalKelasAsal,
         $tanggalKelasPengganti,
         $jamMulai,
-        $jamSelesai
+        $jamSelesai,
+        $durasiMenit
       ) {
         $pengajuan = new Pengajuan([
           'mahasiswa_id' => $mahasiswa->id,
@@ -89,7 +103,7 @@ class PengajuanService
           ruangan: $ruangan,
           lampiran: $lampiran,
           lampiranPath: $lampiranPath,
-          durasiMenit: $jadwal->jam_mulai->diffInMinutes($jadwal->jam_selesai),
+          durasiMenit: $durasiMenit,
           tanggalKelasPengganti: $tanggalKelasPengganti,
           jamSelesai: $jamSelesai
         );
@@ -97,10 +111,10 @@ class PengajuanService
         return $pengajuan->load([
           'jadwal',
           'ruangan',
-          'mahasiswa'
+          'mahasiswa',
         ]);
       });
-    } catch (\Throwable $throwable) {
+    } catch (Throwable $throwable) {
       if ($lampiranPath !== null) {
         Storage::disk('public')->delete($lampiranPath);
       }
@@ -110,26 +124,46 @@ class PengajuanService
   }
 
   /**
+   * Validasi bahwa tanggal kelas asal sesuai dengan hari jadwal reguler.
+   *
+   * Jika tidak sesuai, akan dilemparkan ValidationException.
+   */
+  private function validateOriginalClassDate(
+    Jadwal $jadwal,
+    Carbon $tanggalKelasAsal
+  ): void {
+    $hari = Hari::namaDariTanggal($tanggalKelasAsal);
+
+    if ($hari !== $jadwal->hari->value) {
+      throw ValidationException::withMessages([
+        'tanggal_kelas_asal' =>
+        'Tanggal kelas asal tidak sesuai dengan hari jadwal reguler.',
+      ]);
+    }
+  }
+
+  /**
    * Menyetujui pengajuan.
    *
    * Memperbarui status pengajuan menjadi approved dan menambahkan riwayat proses di MongoDB.
    */
-  public function approve(Pengajuan $pengajuan, User $admin): Pengajuan
+  public function approve(Pengajuan $pengajuan, User $admin, ?string $catatan = null): Pengajuan
   {
-    return $this->withinTransaction(function () use ($pengajuan, $admin) {
+    return $this->withinTransaction(function () use ($pengajuan, $admin, $catatan) {
       $pengajuan = $this->ensureProcessable($pengajuan);
 
       $pengajuan->forceFill([
         'status' => PengajuanStatus::Approved->value,
         'processed_at' => now(),
         'processed_by' => $admin->id,
+        'catatan_admin' => $catatan,
       ])->save();
 
       $this->appendStatusHistory(
         pengajuan: $pengajuan,
         status: PengajuanStatus::Approved,
         admin: $admin,
-        catatan: 'Pengajuan disetujui oleh admin.'
+        catatan: $catatan ?? 'Pengajuan disetujui oleh admin.'
       );
 
       return $pengajuan->fresh(['jadwal', 'ruangan', 'mahasiswa', 'processedBy']);
@@ -220,7 +254,17 @@ class PengajuanService
       ]);
     }
 
-    return $jamMulaiCarbon->addMinutes($jamMulaiJadwal->diffInMinutes($jamSelesaiJadwal));
+    $jamSelesai = $jamMulaiCarbon->copy()->addMinutes(
+      $jamMulaiJadwal->diffInMinutes($jamSelesaiJadwal)
+    );
+
+    if ($jamSelesai->isNextDay()) {
+      throw ValidationException::withMessages([
+        'jam_mulai' => 'Jam mulai menghasilkan jam selesai yang melewati hari berikutnya.',
+      ]);
+    }
+
+    return $jamSelesai;
   }
 
   /**
@@ -415,10 +459,10 @@ class PengajuanService
    *
    * @template T
    *
-   * @param callable():T $callback
+   * @param  callable():T  $callback
    * @return T
    *
-   * @throws \Throwable
+   * @throws Throwable
    */
   private function withinTransaction(callable $callback): mixed
   {
@@ -429,7 +473,7 @@ class PengajuanService
       DB::commit();
 
       return $result;
-    } catch (\Throwable $throwable) {
+    } catch (Throwable $throwable) {
       DB::rollBack();
 
       throw $throwable;

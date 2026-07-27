@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class SubmitPengajuanRequest extends FormRequest
+final class SubmitPengajuanRequest extends FormRequest
 {
     /**
      * Otorisasi request ini.
@@ -24,37 +26,39 @@ class SubmitPengajuanRequest extends FormRequest
             'jadwal_id' => [
                 'required',
                 'integer',
-                'exists:jadwals,id'
+                'exists:jadwals,id',
             ],
             'tanggal_kelas_asal' => [
                 'required',
                 'date',
-                'before:tanggal_kelas_pengganti'
+                'before:tanggal_kelas_pengganti',
+                'before_or_equal:today',
             ],
             'tanggal_kelas_pengganti' => [
                 'required',
                 'date',
-                'after_or_equal:today'
+                'after:tanggal_kelas_asal',
+                'after_or_equal:today',
             ],
             'jam_mulai' => [
                 'required',
-                'date_format:H:i'
+                'date_format:H:i',
             ],
             'ruangan_id' => [
                 'required',
                 'integer',
-                Rule::exists('ruangans', 'id')->where('status', 'aktif')
+                Rule::exists('ruangans', 'id')->where('status', 'aktif'),
             ],
             'alasan' => [
                 'required',
                 'string',
-                'max:500'
+                'max:500',
             ],
             'lampiran' => [
                 'nullable',
                 'file',
                 'mimes:pdf,jpg,jpeg,png',
-                'max:5120' // Maksimal 5MB
+                'max:5120', // Maksimal 5MB
             ],
         ];
     }
@@ -84,7 +88,7 @@ class SubmitPengajuanRequest extends FormRequest
             'alasan.max' => 'Alasan maksimal 500 karakter.',
             'lampiran.file' => 'Lampiran harus berupa file.',
             'lampiran.mimes' => 'Lampiran harus berupa file PDF, JPG, JPEG, atau PNG.',
-            'lampiran.max' => 'Ukuran lampiran maksimal 5MB.'
+            'lampiran.max' => 'Ukuran lampiran maksimal 5MB.',
         ];
     }
 }

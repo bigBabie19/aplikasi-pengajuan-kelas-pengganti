@@ -7,6 +7,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\HariEnum;
+use App\Enums\SemesterEnum;
 
 final class Jadwal extends Model
 {
@@ -27,6 +29,8 @@ final class Jadwal extends Model
         'jumlah_peserta' => 'integer',
         'jam_mulai' => 'datetime:H:i',
         'jam_selesai' => 'datetime:H:i',
+        'semester' => SemesterEnum::class,
+        'hari' => HariEnum::class,
     ];
 
     /**

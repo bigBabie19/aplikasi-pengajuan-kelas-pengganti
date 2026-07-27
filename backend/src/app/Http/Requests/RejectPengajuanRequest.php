@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RejectPengajuanRequest extends FormRequest
+final class RejectPengajuanRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +25,7 @@ class RejectPengajuanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'catatan' => [
+            'catatan_admin' => [
                 'nullable',
                 'string',
                 'max:1000',
@@ -39,8 +41,8 @@ class RejectPengajuanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'catatan.string' => 'Catatan penolakan harus berupa teks.',
-            'catatan.max' => 'Catatan penolakan maksimal 1000 karakter.',
+            'catatan_admin.string' => 'Catatan penolakan harus berupa teks.',
+            'catatan_admin.max' => 'Catatan penolakan maksimal 1000 karakter.',
         ];
     }
 }
