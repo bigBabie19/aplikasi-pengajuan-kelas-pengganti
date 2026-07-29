@@ -1,0 +1,2 @@
+/root/tugas-akhir/aplikasi-pengajuan-kelas-pengganti/android/app/.cxx/Debug/1q43j4b4/x86_64/CMakeFiles/edit_cache.dir
+/root/tugas-akhir/aplikasi-pengajuan-kelas-pengganti/android/app/.cxx/Debug/1q43j4b4/x86_64/CMakeFiles/rebuild_cache.dir

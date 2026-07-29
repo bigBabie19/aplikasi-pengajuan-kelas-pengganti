@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/root/pemrograman-mobile/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/usr/bin/ninja",
+      "-C",
+      "/root/tugas-akhir/aplikasi-pengajuan-kelas-pengganti/android/app/.cxx/Debug/1q43j4b4/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/usr/bin/ninja",
+    "-C",
+    "/root/tugas-akhir/aplikasi-pengajuan-kelas-pengganti/android/app/.cxx/Debug/1q43j4b4/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
