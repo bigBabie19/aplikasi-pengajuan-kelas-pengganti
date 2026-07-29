@@ -47,8 +47,7 @@ final class UsersTable
                     Tables\Columns\TextColumn::make('roles.name')
                         ->badge()
                         ->weight(FontWeight::Bold)
-                        ->formatStateUsing(fn (string $state): string => Str::title(str_replace('_', ' ', $state)))
-                        ->sortable()
+                        ->formatStateUsing(fn(string $state): string => Str::title(str_replace('_', ' ', $state))) 
                         ->searchable(),
 
                     Tables\Columns\Layout\Stack::make([

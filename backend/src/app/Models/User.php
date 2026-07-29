@@ -68,16 +68,16 @@ final class User extends Authenticatable
     public function getFilamentAvatarUrl(): string
     {
         if ($this->avatar_url) {
-            return asset('storage/'.$this->avatar_url);
+            return asset('storage/' . $this->avatar_url);
         }
         $hash = md5(mb_strtolower(mb_trim($this->email)));
 
-        return 'https://www.gravatar.com/avatar/'.$hash.'?d=mp&r=g&s=250';
+        return 'https://www.gravatar.com/avatar/' . $hash . '?d=mp&r=g&s=250';
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->hasRole('admin');
     }
 
     /**

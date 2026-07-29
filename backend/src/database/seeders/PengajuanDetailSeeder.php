@@ -49,7 +49,28 @@ final class PengajuanDetailSeeder extends Seeder
             $configuration['status']
           ),
 
-          'metadata' => $configuration['metadata'],
+          'metadata' => array_merge(
+            $configuration['metadata'],
+            [
+              'status_terakhir' => $configuration['status'],
+
+              'processed_at' => in_array(
+                $configuration['status'],
+                ['approved', 'rejected'],
+                true
+              )
+                ? now()->toIso8601String()
+                : null,
+
+              'processed_by' => in_array(
+                $configuration['status'],
+                ['approved', 'rejected'],
+                true
+              )
+                ? $pengajuan->processed_by
+                : null,
+            ]
+          ),
         ]
 
       );
@@ -61,7 +82,8 @@ final class PengajuanDetailSeeder extends Seeder
     $history = [
       [
         'status' => 'pending',
-        'timestamp' => now()->subHour()->toISOString(),
+        'waktu' => now()->subHour()->toIso8601String(),
+        'catatan' => 'Pengajuan dibuat oleh mahasiswa.',
       ],
     ];
 
@@ -69,7 +91,11 @@ final class PengajuanDetailSeeder extends Seeder
 
       $history[] = [
         'status' => $status,
-        'timestamp' => now()->toISOString(),
+        'waktu' => now()->toIso8601String(),
+        'catatan' => match ($status) {
+          'approved' => 'Pengajuan disetujui oleh admin.',
+          'rejected' => 'Ruangan tidak tersedia.',
+        },
       ];
     }
 
@@ -79,28 +105,31 @@ final class PengajuanDetailSeeder extends Seeder
   private function activity(string $status): array
   {
     $activity = [
+
       [
-        'actor' => 'mahasiswa',
-        'activity' => 'Mengajukan kelas pengganti.',
-        'timestamp' => now()->subHour()->toISOString(),
+        'step' => 'validate_room',
+        'message' => 'Ruangan diverifikasi terhadap jadwal reguler dan pengajuan lain.',
+      ],
+
+      [
+        'step' => 'submit',
+        'message' => 'Pengajuan kelas pengganti berhasil disimpan.',
       ],
     ];
 
     if ($status === 'approved') {
 
       $activity[] = [
-        'actor' => 'admin',
-        'activity' => 'Menyetujui pengajuan.',
-        'timestamp' => now()->toISOString(),
+        'step' => 'approve',
+        'message' => 'Pengajuan disetujui oleh admin.',
       ];
     }
 
     if ($status === 'rejected') {
 
       $activity[] = [
-        'actor' => 'admin',
-        'activity' => 'Menolak pengajuan.',
-        'timestamp' => now()->toISOString(),
+        'step' => 'reject',
+        'message' => 'Ruangan tidak tersedia.',
       ];
     }
 

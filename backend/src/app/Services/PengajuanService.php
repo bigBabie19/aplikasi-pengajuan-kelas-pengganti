@@ -507,4 +507,33 @@ final class PengajuanService
       ]);
     }
   }
+
+  public function findForAdmin(int $id): array
+  {
+    $pengajuan = Pengajuan::query()
+      ->with([
+        'mahasiswa.user',
+        'mahasiswa.programStudi',
+        'jadwal.mataKuliah',
+        'jadwal.dosen.user',
+        'ruangan',
+        'processedBy',
+      ])
+      ->findOrFail($id);
+
+    $detail = PengajuanDetail::query()
+      ->where('pengajuan_id', $pengajuan->id)
+      ->first();
+
+    return [
+      'record' => $pengajuan,
+
+      'mongodb' => [
+        'lampiran' => $detail?->lampiran ?? [],
+        'metadata' => $detail?->metadata ?? [],
+        'riwayat_status' => $detail?->riwayat_status ?? [],
+        'activity_log' => $detail?->activity_log ?? [],
+      ],
+    ];
+  }
 }

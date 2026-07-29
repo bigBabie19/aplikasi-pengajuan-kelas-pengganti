@@ -12,18 +12,18 @@ final class PengajuanDetail extends Model
 
     protected $collection = 'pengajuan_details';
 
-    protected $casts = [
-        'lampiran' => 'array',
-        'riwayat_status' => 'array',
-        'activity_log' => 'array',
-        'metadata' => 'array',
-    ];
-
     protected $fillable = [
         'pengajuan_id',
         'lampiran',
         'riwayat_status',
         'activity_log',
         'metadata',
+    ];
+
+    protected $casts = [
+        'lampiran' => 'array',
+        'riwayat_status' => 'array',
+        'activity_log' => 'array',
+        'metadata' => 'array',
     ];
 }
