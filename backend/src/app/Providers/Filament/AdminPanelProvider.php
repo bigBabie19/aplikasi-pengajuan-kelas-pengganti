@@ -64,8 +64,7 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
-            ->pages([
-            ])
+            ->pages([])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
                 OverlookWidget::class,
@@ -81,11 +80,12 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 AuthDesignerPlugin::make()
-                    ->login(fn ($config) => $config
-                        ->media('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
-                        ->mediaPosition(MediaPosition::Left)
-                        ->mediaSize('70%')
-                        ->blur(1)
+                    ->login(
+                        fn($config) => $config
+                            ->media('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
+                            ->mediaPosition(MediaPosition::Left)
+                            ->mediaSize('70%')
+                            ->blur(1)
                     )
                     ->themeToggle('90%', '50%'),
                 BreezyCore::make()
@@ -107,26 +107,26 @@ final class AdminPanelProvider extends PanelProvider
                     ->includes([
                         UserResource::class,
                     ]),
-                FilamentShieldPlugin::make()
-                    ->gridColumns([
-                        'default' => 2,
-                    ])
-                    ->sectionColumnSpan(1)
-                    ->checkboxListColumns([
-                        'default' => 2,
-                    ])
-                    ->resourceCheckboxListColumns([
-                        'default' => 2,
-                    ])
-                    ->navigationLabel('Roles & Permissions')
-                    ->navigationGroup('Administration')
-                    ->navigationSort(2)
-                    ->navigationIcon(Heroicon::ShieldCheck),
+                // FilamentShieldPlugin::make()
+                //     ->gridColumns([
+                //         'default' => 2,
+                //     ])
+                //     ->sectionColumnSpan(1)
+                //     ->checkboxListColumns([
+                //         'default' => 2,
+                //     ])
+                //     ->resourceCheckboxListColumns([
+                //         'default' => 2,
+                //     ])
+                //     ->navigationLabel('Roles & Permissions')
+                //     ->navigationGroup('Administration')
+                //     ->navigationSort(2)
+                //     ->navigationIcon(Heroicon::ShieldCheck),
                 FilamentLoggerPlugin::make(),
-                FilamentDeveloperLoginsPlugin::make()
-                    ->enabled(app()->environment('local'))
-                    ->switchable(true)
-                    ->users(fn () => User::pluck('email', 'name')->toArray()),
+                // FilamentDeveloperLoginsPlugin::make()
+                //     ->enabled(app()->environment('local'))
+                //     ->switchable(true)
+                //     ->users(fn () => User::pluck('email', 'name')->toArray()),
             ])
             ->middleware([
                 EncryptCookies::class,

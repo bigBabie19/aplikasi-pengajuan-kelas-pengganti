@@ -1,0 +1,6 @@
+exit
+db.dropDatabase()
+db.dropDatabase()use hybrid-db
+exit
+db.dropDatabase()
+use hybrid-db
