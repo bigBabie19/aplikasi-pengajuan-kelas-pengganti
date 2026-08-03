@@ -36,7 +36,7 @@ class AppLogo extends StatelessWidget {
           'Pengajuan Kelas Pengganti',
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey,
+            color: AppColors.subtitle,
           ),
         ),
       ],

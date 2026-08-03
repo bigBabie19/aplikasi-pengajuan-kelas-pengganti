@@ -66,15 +66,22 @@ class DetailPengajuan extends Page
                 ->icon(PengajuanStatus::Approved->icon())
                 ->color(PengajuanStatus::Approved->color())
                 ->hidden(fn() => $this->pengajuan->status !== PengajuanStatus::Pending->value)
+                ->form([
+                    Textarea::make('catatan')
+                        ->label('Catatan Admin')
+                        ->helperText('Opsional')
+                        ->rows(4),
+                ])
                 ->requiresConfirmation()
                 ->modalHeading('Setujui Pengajuan')
                 ->modalDescription('Apakah Anda yakin ingin menyetujui pengajuan ini?')
-                ->action(function () {
+                ->action(function (array $data) {
 
                     app(PengajuanService::class)
                         ->approve(
                             $this->pengajuan,
                             $this->admin(),
+                            $data['catatan'],
                         );
 
                     $this->loadData();

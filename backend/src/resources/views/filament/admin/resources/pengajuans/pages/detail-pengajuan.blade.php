@@ -203,23 +203,6 @@ default => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
             @endphp
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-
-                <div>
-                    <p class="text-sm text-gray-500">Platform</p>
-
-                    <p class="mt-1 font-semibold">
-                        {{ strtoupper($metadata['platform'] ?? '-') }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-sm text-gray-500">App Version</p>
-
-                    <p class="mt-1 font-semibold">
-                        {{ $metadata['app_version'] ?? '-' }}
-                    </p>
-                </div>
-
                 <div>
                     <p class="text-sm text-gray-500">Status Terakhir</p>
 
@@ -246,12 +229,46 @@ default => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
                     </p>
                 </div>
 
-                <div>
-                    <p class="text-sm text-gray-500">Jumlah Lampiran</p>
-
-                    <p class="mt-1 font-semibold">
-                        {{ count($mongodb['lampiran'] ?? []) }}
+                <div class="md:col-span-2">
+                    <p class="text-sm text-gray-500">
+                        Lampiran
                     </p>
+
+                    @php
+                    $lampiran = $mongodb['lampiran'][0] ?? null;
+                    @endphp
+
+                    @if($lampiran)
+
+
+                    <div class="mt-2">
+
+                        <div class="font-medium">
+                            {{ $lampiran['nama_asli'] }}
+                        </div>
+
+                        <div class="text-sm text-gray-500">
+                            {{ strtoupper($lampiran['mime_type']) }}
+                        </div>
+
+                        <x-filament::button
+                            tag="a"
+                            href="{{ asset('storage/'.$lampiran['path']) }}"
+                            target="_blank"
+                            icon="heroicon-o-paper-clip"
+                            class="mt-3">
+                            Lihat Lampiran
+                        </x-filament::button>
+
+                    </div>
+
+                    @else
+
+                    <span class="text-gray-500">
+                        Tidak ada lampiran
+                    </span>
+
+                    @endif
                 </div>
 
             </div>

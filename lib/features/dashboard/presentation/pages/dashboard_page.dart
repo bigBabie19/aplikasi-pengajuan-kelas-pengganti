@@ -1,77 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../auth/providers/auth_provider.dart';
+import '../../providers/dashboard_provider.dart';
+import '../widgets/dashboard_app_bar.dart';
+import '../widgets/dashboard_error.dart';
+import '../widgets/dashboard_loading.dart';
+import '../widgets/dashboard_placeholder.dart';
+import '../widgets/app_bottom_navigation.dart';
+import '../widgets/dashboard_navigation_item.dart';
+import '../../../../core/theme/app_colors.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
 
-    final user = authState.user;
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() async {
+      await ref.read(dashboardNotifierProvider.notifier).loadDashboard();
+    });
+  }
+
+  Future<void> _refresh() async {
+    await ref.read(dashboardNotifierProvider.notifier).refresh();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(
+      dashboardNotifierProvider,
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            tooltip: 'Logout',
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authNotifierProvider.notifier).logout();
-
-              if (!context.mounted) return;
-
-              context.go('/login');
-            },
-          ),
-        ],
+      backgroundColor: AppColors.background,
+      appBar: const DashboardAppBar(),
+      bottomNavigationBar: const AppBottomNavigation(
+        current: DashboardNavigationItem.dashboard,
       ),
-      body: user == null
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                const Text(
-                  'Selamat Datang',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.name,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          user.email,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'ID : ${user.id}',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      body: RefreshIndicator(
+        displacement: 24,
+        onRefresh: _refresh,
+        child: Builder(
+          builder: (_) {
+            if (state.isLoading && state.dashboard == null) {
+              return const DashboardLoading();
+            }
+
+            if (state.error != null && state.dashboard == null) {
+              return DashboardError(
+                message: state.error!,
+                onRetry: () async {
+                  await ref
+                      .read(
+                        dashboardNotifierProvider.notifier,
+                      )
+                      .loadDashboard(
+                        forceRefresh: true,
+                      );
+                },
+              );
+            }
+
+            final dashboard = state.dashboard;
+
+            if (dashboard == null) {
+              return const SizedBox.shrink();
+            }
+
+            return DashboardPlaceholder(
+              dashboard: dashboard,
+            );
+          },
+        ),
+      ),
     );
   }
 }

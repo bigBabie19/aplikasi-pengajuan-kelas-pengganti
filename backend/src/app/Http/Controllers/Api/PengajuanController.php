@@ -9,6 +9,9 @@ use App\Http\Requests\RejectPengajuanRequest;
 use App\Http\Requests\ApprovePengajuanRequest;
 use App\Http\Requests\SubmitPengajuanRequest;
 use App\Http\Resources\PengajuanResource;
+use App\Http\Resources\Mobile\CourseDropdownResource;
+use App\Http\Resources\Mobile\ScheduleDropdownResource;
+use App\Http\Resources\Mobile\RoomDropdownResource;
 use App\Models\User;
 use App\Models\Pengajuan;
 use App\Services\PengajuanService;
@@ -16,6 +19,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 final class PengajuanController extends Controller
 {
@@ -127,5 +132,57 @@ final class PengajuanController extends Controller
             ->paginate(10);
 
         return PengajuanResource::collection($pengajuans);
+    }
+
+    public function courses(Request $request): JsonResponse
+    {
+        $courses = $this->pengajuanService->searchCourses(
+            $request->query('search')
+        );
+
+        return response()->json([
+            'message' => 'Daftar mata kuliah berhasil diambil.',
+            'data' => CourseDropdownResource::collection($courses),
+        ]);
+    }
+
+    public function schedules(Request $request): JsonResponse
+    {
+        $validated = Validator::make(
+            $request->all(),
+            [
+                'course_id' => ['required', 'integer', 'exists:mata_kuliahs,id'],
+            ]
+        )->validate();
+
+        $schedules = $this->pengajuanService->getSchedules(
+            $validated['course_id']
+        );
+
+        return response()->json([
+            'message' => 'Daftar jadwal berhasil diambil.',
+            'data' => ScheduleDropdownResource::collection($schedules),
+        ]);
+    }
+
+    public function availableRooms(Request $request): JsonResponse
+    {
+        $validated = Validator::make(
+            $request->all(),
+            [
+                'jadwal_id' => ['required', 'integer', 'exists:jadwals,id'],
+                'tanggal_kelas_pengganti' => ['required', 'date'],
+                'jam_mulai' => ['required', 'date_format:H:i'],
+            ]
+        )->validate();
+
+        $rooms = $this->pengajuanService->getAvailableRooms(
+            $validated
+        );
+
+        return response()->json([
+            'message' => 'Daftar ruangan tersedia berhasil diambil.',
+            'data' => RoomDropdownResource::collection($rooms),
+        ]);
     }
 }

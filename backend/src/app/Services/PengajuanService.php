@@ -9,6 +9,7 @@ use App\Models\Jadwal;
 use App\Models\Mahasiswa;
 use App\Models\Pengajuan;
 use App\Models\PengajuanDetail;
+use App\Models\MataKuliah;
 use App\Models\Ruangan;
 use App\Models\User;
 use App\Support\Hari;
@@ -235,6 +236,67 @@ final class PengajuanService
   }
 
   /**
+   * Mengambil daftar mata kuliah untuk autocomplete form pengajuan.
+   *
+   * Jika keyword pencarian dikirim, hasil akan difilter berdasarkan nama
+   * mata kuliah. Data dibatasi maksimal 20 item agar respons tetap ringan.
+   */
+  public function searchCourses(?string $search = null): Collection
+  {
+    $keyword = trim((string) $search);
+
+    return MataKuliah::query()
+      ->select([
+        'id',
+        'kode',
+        'nama',
+        'sks',
+        'semester',
+        'program_studi_id',
+      ])
+      ->when(
+        $keyword !== '',
+        fn($query) => $query->where('nama', 'like', "%{$keyword}%")
+      )
+      ->orderBy('nama')
+      ->limit(20)
+      ->get();
+  }
+
+  /**
+   * Mengambil daftar jadwal berdasarkan mata kuliah.
+   *
+   * Digunakan untuk dependent dropdown setelah mahasiswa memilih
+   * mata kuliah pada form pengajuan kelas pengganti.
+   */
+  public function getSchedules(int|string $courseId): Collection
+  {
+    return Jadwal::query()
+      ->with([
+        'mataKuliah:id,kode,nama,sks,semester',
+        'dosen:id,user_id,nidn',
+        'dosen.user:id,name,email',
+        'ruangan:id,kode,nama,kapasitas,gedung,lantai,status',
+      ])
+      ->select([
+        'id',
+        'mata_kuliah_id',
+        'dosen_id',
+        'ruangan_id',
+        'kode_kelas',
+        'jumlah_peserta',
+        'hari',
+        'jam_mulai',
+        'jam_selesai',
+        'tahun_ajaran',
+        'semester',
+      ])
+      ->where('mata_kuliah_id', $courseId)
+      ->orderBy('kode_kelas')
+      ->get();
+  }
+
+  /**
    * Menghitung jam selesai berdasarkan durasi jadwal asli.
    *
    * Dipakai agar kelas pengganti selalu memiliki durasi yang sama dengan kelas reguler.
@@ -344,12 +406,14 @@ final class PengajuanService
   ): void {
     PengajuanDetail::query()->create([
       'pengajuan_id' => $pengajuan->id,
-      'lampiran' => $lampiranPath ? [
-        'path' => $lampiranPath,
-        'nama_asli' => $lampiran?->getClientOriginalName(),
-        'mime_type' => $lampiran?->getClientMimeType(),
-        'ukuran' => $lampiran?->getSize(),
-      ] : null,
+      'lampiran' => $lampiranPath
+        ? [[
+          'path' => $lampiranPath,
+          'nama_asli' => $lampiran?->getClientOriginalName(),
+          'mime_type' => $lampiran?->getClientMimeType(),
+          'ukuran' => $lampiran?->getSize(),
+        ]]
+        : [],
       'riwayat_status' => [
         [
           'status' => PengajuanStatus::Pending->value,

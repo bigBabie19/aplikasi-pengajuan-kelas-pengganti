@@ -58,6 +58,9 @@ dependencies:
   # Image Cache
   cached_network_image: ^3.4.1
 
+  path: ^1.9.1
+  dropdown_search: ^6.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -32,13 +32,11 @@ final class SubmitPengajuanRequest extends FormRequest
                 'required',
                 'date',
                 'before:tanggal_kelas_pengganti',
-                'before_or_equal:today',
             ],
             'tanggal_kelas_pengganti' => [
                 'required',
                 'date',
                 'after:tanggal_kelas_asal',
-                'after_or_equal:today',
             ],
             'jam_mulai' => [
                 'required',

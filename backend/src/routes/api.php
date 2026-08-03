@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PengajuanController;
+use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     'logout',
   ]);
 
+  Route::get('/dashboard', DashboardController::class);
+
   /*
     |--------------------------------------------------------------------------
     | Pengajuan
@@ -44,6 +47,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
   Route::controller(PengajuanController::class)
     ->prefix('pengajuan')
     ->group(function (): void {
+
+      // Data Form Pengajuan
+      Route::get('/courses', 'courses');
+      Route::get('/schedules', 'schedules');
+      Route::get('/available-rooms', 'availableRooms');
 
       // Mahasiswa & Admin
       Route::get('/', 'index');

@@ -16,4 +16,14 @@ class AppColors {
   static const subtitle = Color(0xff777777);
 
   static const orange = Color(0xffE67E22);
+  
+  static const success = Color(0xff27AE60);
+
+  static const danger = Color(0xffE74C3C);
+
+  static const pending = orange;
+
+  static const divider = Color(0xffECECEC);
+
+  static const shadow = Color(0x14000000);
 }
