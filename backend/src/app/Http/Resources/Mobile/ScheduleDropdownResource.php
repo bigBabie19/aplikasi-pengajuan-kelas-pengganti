@@ -27,6 +27,7 @@ final class ScheduleDropdownResource extends JsonResource
       'lecturer_name' => $this->dosen?->user?->name,
       'class_name' => $this->kode_kelas,
       'participants' => $this->jumlah_peserta,
+      'day' => $this->hari?->value ?? $this->hari,
       'start_time' => $this->jam_mulai?->format('H:i'),
       'end_time' => $this->jam_selesai?->format('H:i'),
     ];

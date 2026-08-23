@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_style.dart';
-import '../../../dashboard/data/models/recent_submission_model.dart';
+import '../../data/models/history_submission_model.dart';
 
 class HistoryCard extends StatelessWidget {
   const HistoryCard({
@@ -11,7 +11,7 @@ class HistoryCard extends StatelessWidget {
     this.onTap,
   });
 
-  final RecentSubmissionModel submission;
+  final HistorySubmissionModel submission;
   final VoidCallback? onTap;
 
   Color _statusColor() {
@@ -42,6 +42,8 @@ class HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = _statusColor();
+
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
@@ -57,10 +59,10 @@ class HistoryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                backgroundColor: _statusColor().withOpacity(.12),
+                backgroundColor: color.withOpacity(.12),
                 child: Icon(
                   _statusIcon(),
-                  color: _statusColor(),
+                  color: color,
                 ),
               ),
               const SizedBox(width: 14),
@@ -69,7 +71,7 @@ class HistoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      submission.courseName,
+                      submission.courseClass,
                       style: AppTextStyle.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.text,
@@ -77,7 +79,23 @@ class HistoryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      submission.date,
+                      submission.submitter,
+                      style: AppTextStyle.caption.copyWith(
+                        color: AppColors.subtitle,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      submission.room,
+                      style: AppTextStyle.caption.copyWith(
+                        color: AppColors.subtitle,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${submission.replacementDate} • '
+                      '${submission.startTime} - '
+                      '${submission.endTime}',
                       style: AppTextStyle.caption.copyWith(
                         color: AppColors.subtitle,
                       ),
@@ -85,13 +103,14 @@ class HistoryCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Chip(
-                backgroundColor: _statusColor().withOpacity(.12),
+                backgroundColor: color.withOpacity(.12),
                 side: BorderSide.none,
                 label: Text(
-                  submission.status,
+                  submission.status.toUpperCase(),
                   style: TextStyle(
-                    color: _statusColor(),
+                    color: color,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

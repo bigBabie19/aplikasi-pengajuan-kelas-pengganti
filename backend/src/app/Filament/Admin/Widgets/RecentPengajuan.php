@@ -22,7 +22,7 @@ class RecentPengajuan extends TableWidget
             ->query(
                 fn(): Builder => Pengajuan::query()
                     ->with([
-                        'mahasiswa.user',
+                        'user',
                         'jadwal.mataKuliah',
                         'ruangan',
                     ])
@@ -30,8 +30,8 @@ class RecentPengajuan extends TableWidget
                     ->limit(5)
             )
             ->columns([
-                TextColumn::make('mahasiswa.user.name')
-                    ->label('Nama Mahasiswa')
+                TextColumn::make('user.name')
+                    ->label('Nama Pemohon')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jadwal.mataKuliah.nama')

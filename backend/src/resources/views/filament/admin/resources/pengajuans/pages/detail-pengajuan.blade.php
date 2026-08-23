@@ -29,7 +29,7 @@ default => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
                 </p>
 
                 <p class="mt-1 text-base font-semibold">
-                    {{ $pengajuan->mahasiswa->user->name }}
+                    {{ $pengajuan->user->name }}
                 </p>
             </div>
 
@@ -39,7 +39,7 @@ default => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
                 </p>
 
                 <p class="mt-1 text-base font-semibold">
-                    {{ $pengajuan->mahasiswa->nim }}
+                    {{ $pengajuan->mahasiswa->nim ?? '-' }}
                 </p>
             </div>
 
@@ -49,7 +49,7 @@ default => 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
                 </p>
 
                 <p class="mt-1 text-base font-semibold">
-                    {{ $pengajuan->mahasiswa->programStudi->nama }}
+                    {{ $pengajuan->mahasiswa->programStudi->nama ?? '-' }}
                 </p>
             </div>
 

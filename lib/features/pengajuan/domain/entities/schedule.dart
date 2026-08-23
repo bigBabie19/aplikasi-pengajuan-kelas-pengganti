@@ -6,6 +6,7 @@ class Schedule {
   final String lecturerName;
   final String className;
   final int participants;
+  final String day;
   final String startTime;
   final String endTime;
 
@@ -17,6 +18,7 @@ class Schedule {
     required this.lecturerName,
     required this.className,
     required this.participants,
+    required this.day,
     required this.startTime,
     required this.endTime,
   });

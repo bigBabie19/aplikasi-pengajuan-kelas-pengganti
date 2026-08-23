@@ -33,6 +33,7 @@ class ScheduleDropdown extends ConsumerWidget {
         compareFn: (a, b) => a.id == b.id,
         itemAsString: (schedule) {
           return '${schedule.className} • '
+              '${schedule.day}, '
               '${schedule.startTime}-${schedule.endTime}';
         },
         decoratorProps: DropDownDecoratorProps(

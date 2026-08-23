@@ -47,6 +47,7 @@ class PengajuanRepositoryImpl implements PengajuanRepository {
             lecturerName: model.lecturerName,
             className: model.className,
             participants: model.participants,
+            day: model.day,
             startTime: model.startTime,
             endTime: model.endTime,
           ),

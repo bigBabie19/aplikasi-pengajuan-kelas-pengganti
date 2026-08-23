@@ -20,8 +20,8 @@ class PengajuansTable
                 ['record' => $record],
             ))
             ->columns([
-                TextColumn::make('mahasiswa.user.name')
-                    ->label('Mahasiswa')
+                TextColumn::make('user.name')
+                    ->label('Pemohon')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jadwal.mataKuliah.nama')

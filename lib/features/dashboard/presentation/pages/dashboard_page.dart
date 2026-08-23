@@ -23,7 +23,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     super.initState();
 
     Future.microtask(() async {
-      await ref.read(dashboardNotifierProvider.notifier).loadDashboard();
+      await ref.read(dashboardNotifierProvider.notifier).loadDashboard(
+            forceRefresh: true,
+          );
     });
   }
 

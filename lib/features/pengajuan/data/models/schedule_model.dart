@@ -6,6 +6,7 @@ class ScheduleModel {
   final String lecturerName;
   final String className;
   final int participants;
+  final String day;
   final String startTime;
   final String endTime;
 
@@ -17,6 +18,7 @@ class ScheduleModel {
     required this.lecturerName,
     required this.className,
     required this.participants,
+    required this.day,
     required this.startTime,
     required this.endTime,
   });
@@ -30,6 +32,7 @@ class ScheduleModel {
       lecturerName: json['lecturer_name'] as String,
       className: json['class_name'] as String,
       participants: json['participants'] as int,
+      day: json['day'] as String,
       startTime: json['start_time'] as String,
       endTime: json['end_time'] as String,
     );
@@ -44,6 +47,7 @@ class ScheduleModel {
       'lecturer_name': lecturerName,
       'class_name': className,
       'participants': participants,
+      'day': day,
       'start_time': startTime,
       'end_time': endTime,
     };

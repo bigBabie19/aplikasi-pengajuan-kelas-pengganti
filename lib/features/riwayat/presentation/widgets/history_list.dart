@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../dashboard/data/models/recent_submission_model.dart';
+import '../../data/models/history_submission_model.dart';
 import 'history_card.dart';
 
 class HistoryList extends StatelessWidget {
@@ -10,7 +10,7 @@ class HistoryList extends StatelessWidget {
     required this.submissions,
   });
 
-  final List<RecentSubmissionModel> submissions;
+  final List<HistorySubmissionModel> submissions;
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +33,16 @@ class HistoryList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(
         height: 14,
       ),
-      itemBuilder: (_, index) {
+      itemBuilder: (context, index) {
+        final submission = submissions[index];
+
         return HistoryCard(
-          submission: submissions[index],
+          submission: submission,
           onTap: () {
             context.pushNamed(
               'history-detail',
               pathParameters: {
-                'id': submissions[index].id.toString(),
+                'id': submission.id.toString(),
               },
             );
           },

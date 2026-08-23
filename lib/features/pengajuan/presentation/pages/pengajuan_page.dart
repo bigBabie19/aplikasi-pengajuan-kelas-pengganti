@@ -187,9 +187,9 @@ class _PengajuanPageState extends ConsumerState<PengajuanPage> {
 
         vm.reset();
 
-        ref.invalidate(
-          dashboardNotifierProvider,
-        );
+        await ref.read(dashboardNotifierProvider.notifier).loadDashboard(
+              forceRefresh: true,
+            );
 
         if (!mounted) {
           return;

@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RejectPengajuanRequest;
 use App\Http\Requests\ApprovePengajuanRequest;
+use App\Http\Requests\RejectPengajuanRequest;
 use App\Http\Requests\SubmitPengajuanRequest;
-use App\Http\Resources\PengajuanResource;
 use App\Http\Resources\Mobile\CourseDropdownResource;
-use App\Http\Resources\Mobile\ScheduleDropdownResource;
 use App\Http\Resources\Mobile\RoomDropdownResource;
-use App\Models\User;
+use App\Http\Resources\Mobile\ScheduleDropdownResource;
+use App\Http\Resources\PengajuanResource;
 use App\Models\Pengajuan;
+use App\Models\User;
 use App\Services\PengajuanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 final class PengajuanController extends Controller
 {
@@ -62,7 +61,7 @@ final class PengajuanController extends Controller
         $pengajuan = $this->pengajuanService->approve(
             pengajuan: $pengajuan,
             admin: $admin,
-            catatan: $request->input('catatan_admin')
+            catatan: $request->input('catatan_admin'),
         );
 
         return response()->json([
@@ -81,7 +80,7 @@ final class PengajuanController extends Controller
         $pengajuan = $this->pengajuanService->reject(
             pengajuan: $pengajuan,
             admin: $admin,
-            catatan: $request->validated('catatan_admin')
+            catatan: $request->validated('catatan_admin'),
         );
 
         return response()->json([
@@ -94,7 +93,7 @@ final class PengajuanController extends Controller
         Request $request,
         Pengajuan $pengajuan
     ): PengajuanResource {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($user->hasRole('mahasiswa')) {
@@ -106,7 +105,9 @@ final class PengajuanController extends Controller
         if ($user->hasRole('dosen')) {
             $pengajuan->loadMissing('jadwal');
 
-            if ($pengajuan->jadwal?->dosen_id !== $user->dosen?->id) {
+            if (
+                $pengajuan->jadwal?->dosen_id !== $user->dosen?->id
+            ) {
                 abort(Response::HTTP_FORBIDDEN);
             }
         }
@@ -119,7 +120,7 @@ final class PengajuanController extends Controller
     public function index(
         Request $request
     ): AnonymousResourceCollection {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $query = Pengajuan::query()
@@ -130,9 +131,15 @@ final class PengajuanController extends Controller
         }
 
         if ($user->hasRole('dosen')) {
-            $query->whereHas('jadwal', function ($query) use ($user): void {
-                $query->where('dosen_id', $user->dosen->id);
-            });
+            $query->whereHas(
+                'jadwal',
+                function ($query) use ($user): void {
+                    $query->where(
+                        'dosen_id',
+                        $user->dosen->id
+                    );
+                }
+            );
         }
 
         $pengajuans = $query
@@ -145,7 +152,8 @@ final class PengajuanController extends Controller
     public function courses(Request $request): JsonResponse
     {
         $courses = $this->pengajuanService->searchCourses(
-            $request->query('search')
+            $request->query('search'),
+            $request->user(),
         );
 
         return response()->json([
@@ -159,12 +167,17 @@ final class PengajuanController extends Controller
         $validated = Validator::make(
             $request->all(),
             [
-                'course_id' => ['required', 'integer', 'exists:mata_kuliahs,id'],
+                'course_id' => [
+                    'required',
+                    'integer',
+                    'exists:mata_kuliahs,id',
+                ],
             ]
         )->validate();
 
         $schedules = $this->pengajuanService->getSchedules(
-            $validated['course_id']
+            $validated['course_id'],
+            $request->user(),
         );
 
         return response()->json([
@@ -173,14 +186,25 @@ final class PengajuanController extends Controller
         ]);
     }
 
-    public function availableRooms(Request $request): JsonResponse
-    {
+    public function availableRooms(
+        Request $request
+    ): JsonResponse {
         $validated = Validator::make(
             $request->all(),
             [
-                'jadwal_id' => ['required', 'integer', 'exists:jadwals,id'],
-                'tanggal_kelas_pengganti' => ['required', 'date'],
-                'jam_mulai' => ['required', 'date_format:H:i'],
+                'jadwal_id' => [
+                    'required',
+                    'integer',
+                    'exists:jadwals,id',
+                ],
+                'tanggal_kelas_pengganti' => [
+                    'required',
+                    'date',
+                ],
+                'jam_mulai' => [
+                    'required',
+                    'date_format:H:i',
+                ],
             ]
         )->validate();
 

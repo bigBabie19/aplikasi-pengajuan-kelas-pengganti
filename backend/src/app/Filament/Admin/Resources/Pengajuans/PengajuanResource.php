@@ -37,8 +37,7 @@ class PengajuanResource extends Resource
     {
         return parent::getEloquentQuery()
             ->with([
-                'mahasiswa.user',
-                'mahasiswa.programStudi',
+                'user.mahasiswa.programStudi',
                 'jadwal.mataKuliah',
                 'jadwal.dosen.user',
                 'ruangan',
