@@ -9,9 +9,11 @@ class RecentSubmissionCard extends StatelessWidget {
   const RecentSubmissionCard({
     super.key,
     required this.submission,
+    this.showSubmitter = false,
   });
 
   final RecentSubmissionModel submission;
+  final bool showSubmitter;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +62,24 @@ class RecentSubmissionCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (showSubmitter) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.account_circle_outlined,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        submission.submitter,
+                        style: AppTextStyle.body,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 8),
               Row(
                 children: [

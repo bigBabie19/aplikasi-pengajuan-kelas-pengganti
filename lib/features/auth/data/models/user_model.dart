@@ -3,12 +3,14 @@ class UserModel {
   final String name;
   final String email;
   final String? avatarUrl;
+  final String? role;
 
   const UserModel({
     required this.id,
     required this.name,
     required this.email,
     this.avatarUrl,
+    this.role,
   });
 
   factory UserModel.fromJson(
@@ -19,6 +21,7 @@ class UserModel {
       name: json['name'],
       email: json['email'],
       avatarUrl: json['avatar_url'],
+      role: json['role'],
     );
   }
 
@@ -28,6 +31,7 @@ class UserModel {
       'name': name,
       'email': email,
       'avatar_url': avatarUrl,
+      'role': role,
     };
   }
 }

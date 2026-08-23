@@ -9,9 +9,11 @@ class RecentSubmissionSection extends StatelessWidget {
   const RecentSubmissionSection({
     super.key,
     required this.dashboard,
+    this.showSubmitter = false,
   });
 
   final DashboardModel dashboard;
+  final bool showSubmitter;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class RecentSubmissionSection extends StatelessWidget {
                     ),
                     child: RecentSubmissionCard(
                       submission: submission,
+                      showSubmitter: showSubmitter,
                     ),
                   ),
                 )

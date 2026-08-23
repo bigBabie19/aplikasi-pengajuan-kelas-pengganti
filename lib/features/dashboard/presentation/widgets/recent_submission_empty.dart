@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 class RecentSubmissionEmpty extends StatelessWidget {
   const RecentSubmissionEmpty({
     super.key,
+    this.isLecturer = false,
   });
+
+  final bool isLecturer;
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +33,11 @@ class RecentSubmissionEmpty extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Pengajuan kelas pengganti yang kamu buat akan muncul di sini.',
+            isLecturer
+                ? 'Pengajuan kelas pengganti dari mahasiswa pada mata kuliah yang kamu ampu akan muncul di sini.'
+                : 'Pengajuan kelas pengganti yang kamu buat akan muncul di sini.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey.shade600,
-            ),
-          ),
+          )
         ],
       ),
     );

@@ -7,6 +7,7 @@ import '../features/pengajuan/presentation/pages/pengajuan_page.dart';
 import '../features/riwayat/presentation/pages/history_page.dart';
 import '../features/riwayat/presentation/pages/history_detail_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
+import '../features/dashboard/presentation/pages/role_dashboard_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -22,7 +23,7 @@ final appRouter = GoRouter(
     GoRoute(
       name: 'dashboard',
       path: '/dashboard',
-      builder: (context, state) => const DashboardPage(),
+      builder: (context, state) => const RoleDashboardPage(),
     ),
     GoRoute(
       path: '/pengajuan',

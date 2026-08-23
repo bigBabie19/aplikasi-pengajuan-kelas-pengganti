@@ -2,6 +2,7 @@ class RecentSubmissionModel {
   final int id;
   final String courseName;
   final String lecturer;
+  final String submitter;
   final String room;
   final String day;
   final String date;
@@ -13,6 +14,7 @@ class RecentSubmissionModel {
     required this.id,
     required this.courseName,
     required this.lecturer,
+    required this.submitter,
     required this.room,
     required this.day,
     required this.date,
@@ -25,14 +27,15 @@ class RecentSubmissionModel {
     Map<String, dynamic> json,
   ) {
     return RecentSubmissionModel(
-      id: json['id'],
-      courseName: json['course_name'],
-      lecturer: json['lecturer'],
-      room: json['room'],
-      day: json['day'],
-      date: json['date'],
-      time: json['time'],
-      status: json['status'],
+      id: json['id'] ?? 0,
+      courseName: json['course_name'] ?? '-',
+      lecturer: json['lecturer'] ?? '-',
+      submitter: json['submitter'] ?? '-',
+      room: json['room'] ?? '-',
+      day: json['day'] ?? '-',
+      date: json['date'] ?? '-',
+      time: json['time'] ?? '-',
+      status: json['status'] ?? '-',
       approvalReason: json['approval_reason'],
     );
   }
