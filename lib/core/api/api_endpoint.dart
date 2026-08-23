@@ -2,7 +2,7 @@ class ApiEndpoint {
   ApiEndpoint._();
 
   // IP backend local
-  static const String baseUrl = 'http://10.77.176.120/api';
+  static const String baseUrl = 'http://10.160.210.120/api';
 
   static const String login = '/login';
 

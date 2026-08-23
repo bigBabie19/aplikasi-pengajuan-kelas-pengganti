@@ -38,12 +38,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
   Route::get('/dashboard', DashboardController::class);
 
-  /*
-    |--------------------------------------------------------------------------
-    | Pengajuan
-    |--------------------------------------------------------------------------
-    */
-
   Route::controller(PengajuanController::class)
     ->prefix('pengajuan')
     ->group(function (): void {
@@ -53,12 +47,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
       Route::get('/schedules', 'schedules');
       Route::get('/available-rooms', 'availableRooms');
 
-      // Mahasiswa & Admin
-      Route::get('/', 'index');
-      Route::get('/{pengajuan}', 'show');
+      // Mahasiswa & Dosen & Admin
+      Route::middleware('role:mahasiswa|dosen|admin')->group(function (): void {
+        Route::get('/', 'index');
+        Route::get('/{pengajuan}', 'show');
+      });
 
-      // Mahasiswa
-      Route::middleware('role:mahasiswa')->group(function (): void {
+      // Mahasiswa dan Dosen
+      Route::middleware('role:mahasiswa|dosen')->group(function (): void {
         Route::post('/', 'store');
       });
 

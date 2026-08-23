@@ -29,8 +29,8 @@ final class PengajuanResource extends JsonResource
             'alasan' => $this->alasan,
             'catatan_admin' => $this->catatan_admin,
             'processed_at' => $this->processed_at?->toDateTimeString(),
-            'mahasiswa' => new MahasiswaResource(
-                $this->whenLoaded('mahasiswa')
+            'user' => new UserResource(
+                $this->whenLoaded('user')
             ),
             'jadwal' => new JadwalResource(
                 $this->whenLoaded('jadwal')

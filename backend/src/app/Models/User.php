@@ -58,6 +58,14 @@ final class User extends Authenticatable
     }
 
     /**
+     * Relasi dengan model Pengajuan.
+     */
+    public function pengajuans(): HasMany
+    {
+        return $this->hasMany(Pengajuan::class);
+    }
+
+    /**
      * Relasi dengan model Pengajuan (pengajuan yang diproses oleh admin).
      */
     public function processedPengajuans(): HasMany

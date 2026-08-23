@@ -25,9 +25,9 @@ use Illuminate\Validation\ValidationException;
 final class PengajuanController extends Controller
 {
     private const RELATIONS = [
+        'user',
         'jadwal',
         'ruangan',
-        'mahasiswa',
         'processedBy',
     ];
 
@@ -38,12 +38,12 @@ final class PengajuanController extends Controller
     public function store(
         SubmitPengajuanRequest $request
     ): JsonResponse {
-        /** @var \App\Models\Mahasiswa $mahasiswa */
-        $mahasiswa = $request->user()->mahasiswa;
+        /** @var User $user */
+        $user = $request->user();
 
         $pengajuan = $this->pengajuanService->submit(
             validatedData: $request->validated(),
-            mahasiswa: $mahasiswa,
+            user: $user,
         );
 
         return response()->json([
@@ -94,15 +94,21 @@ final class PengajuanController extends Controller
         Request $request,
         Pengajuan $pengajuan
     ): PengajuanResource {
-
-        /** @var User $user */
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
-        if (
-            $user->hasRole('mahasiswa')
-            && $pengajuan->mahasiswa_id !== $user->mahasiswa->id
-        ) {
-            abort(Response::HTTP_FORBIDDEN);
+        if ($user->hasRole('mahasiswa')) {
+            if ($pengajuan->user_id !== $user->id) {
+                abort(Response::HTTP_FORBIDDEN);
+            }
+        }
+
+        if ($user->hasRole('dosen')) {
+            $pengajuan->loadMissing('jadwal');
+
+            if ($pengajuan->jadwal?->dosen_id !== $user->dosen?->id) {
+                abort(Response::HTTP_FORBIDDEN);
+            }
         }
 
         return new PengajuanResource(
@@ -113,19 +119,21 @@ final class PengajuanController extends Controller
     public function index(
         Request $request
     ): AnonymousResourceCollection {
-
         /** @var \App\Models\User $user */
         $user = $request->user();
 
         $query = Pengajuan::query()
-            ->with(self::RELATIONS)
-            ->when(
-                $user->hasRole('mahasiswa'),
-                fn($query) => $query->where(
-                    'mahasiswa_id',
-                    $user->mahasiswa->id
-                )
-            );
+            ->with(self::RELATIONS);
+
+        if ($user->hasRole('mahasiswa')) {
+            $query->where('user_id', $user->id);
+        }
+
+        if ($user->hasRole('dosen')) {
+            $query->whereHas('jadwal', function ($query) use ($user): void {
+                $query->where('dosen_id', $user->dosen->id);
+            });
+        }
 
         $pengajuans = $query
             ->latest()

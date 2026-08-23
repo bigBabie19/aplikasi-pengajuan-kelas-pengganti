@@ -13,5 +13,6 @@ final class RoleSeeder extends Seeder
     {
         Role::findOrCreate('admin');
         Role::findOrCreate('mahasiswa');
+        Role::findOrCreate('dosen');
     }
 }

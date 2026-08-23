@@ -31,30 +31,51 @@ final class PengajuanService
    * Menyimpan pengajuan baru, menghitung jam selesai otomatis, memeriksa bentrok ruangan,
    * menyimpan lampiran, lalu membuat dokumen detail di MongoDB.
    */
-  public function submit(array $validatedData, Mahasiswa $mahasiswa): Pengajuan
-  {
+  public function submit(
+    array $validatedData,
+    User $user
+  ): Pengajuan {
     $lampiranPath = null;
 
-    /** @var UploadedFile|null */
+    /** @var UploadedFile|null $lampiran */
     $lampiran = null;
 
     try {
-      $jadwal = $this->findJadwalOrFail($validatedData['jadwal_id']);
-      $ruangan = $this->findRuanganOrFail($validatedData['ruangan_id']);
+      $jadwal = $this->findJadwalOrFail(
+        $validatedData['jadwal_id']
+      );
 
-      $tanggalKelasAsal = Carbon::parse($validatedData['tanggal_kelas_asal'])->startOfDay();
-      $tanggalKelasPengganti = Carbon::parse($validatedData['tanggal_kelas_pengganti'])->startOfDay();
+      $ruangan = $this->findRuanganOrFail(
+        $validatedData['ruangan_id']
+      );
+
+      $tanggalKelasAsal = Carbon::parse(
+        $validatedData['tanggal_kelas_asal']
+      )->startOfDay();
+
+      $tanggalKelasPengganti = Carbon::parse(
+        $validatedData['tanggal_kelas_pengganti']
+      )->startOfDay();
 
       $this->validateOriginalClassDate(
         $jadwal,
         $tanggalKelasAsal
       );
 
-      $jamMulai = Carbon::createFromFormat('H:i', $validatedData['jam_mulai']);
-      $jamSelesai = $this->calculateEndTime($jadwal, $jamMulai);
+      $jamMulai = Carbon::createFromFormat(
+        'H:i',
+        $validatedData['jam_mulai']
+      );
+
+      $jamSelesai = $this->calculateEndTime(
+        $jadwal,
+        $jamMulai
+      );
 
       $durasiMenit = (int) round(
-        $jadwal->jam_mulai->diffInMinutes($jadwal->jam_selesai)
+        $jadwal->jam_mulai->diffInMinutes(
+          $jadwal->jam_selesai
+        )
       );
 
       $this->validateRoomAvailability(
@@ -65,15 +86,26 @@ final class PengajuanService
         jamSelesai: $jamSelesai
       );
 
+      $this->validateLecturerAvailability(
+        jadwal: $jadwal,
+        tanggalKelasPengganti: $tanggalKelasPengganti,
+        jamMulai: $jamMulai,
+        jamSelesai: $jamSelesai
+      );
+
       $lampiran = $validatedData['lampiran'] ?? null;
 
       if ($lampiran instanceof UploadedFile) {
-        $lampiranPath = $this->simpanLampiran($lampiran, $mahasiswa, $jadwal);
+        $lampiranPath = $this->simpanLampiran(
+          $lampiran,
+          $user,
+          $jadwal
+        );
       }
 
       return $this->withinTransaction(function () use (
         $validatedData,
-        $mahasiswa,
+        $user,
         $jadwal,
         $ruangan,
         $lampiran,
@@ -85,7 +117,7 @@ final class PengajuanService
         $durasiMenit
       ) {
         $pengajuan = new Pengajuan([
-          'mahasiswa_id' => $mahasiswa->id,
+          'user_id' => $user->id,
           'jadwal_id' => $jadwal->id,
           'ruangan_id' => $ruangan->id,
           'tanggal_kelas_asal' => $tanggalKelasAsal->toDateString(),
@@ -112,7 +144,7 @@ final class PengajuanService
         return $pengajuan->load([
           'jadwal',
           'ruangan',
-          'mahasiswa',
+          'user',
         ]);
       });
     } catch (Throwable $throwable) {
@@ -389,6 +421,38 @@ final class PengajuanService
     }
   }
 
+  private function validateLecturerAvailability(
+    Jadwal $jadwal,
+    Carbon $tanggalKelasPengganti,
+    Carbon $jamMulai,
+    Carbon $jamSelesai
+  ): void {
+    $jamMulaiValue = $jamMulai->format('H:i:s');
+    $jamSelesaiValue = $jamSelesai->format('H:i:s');
+
+    $bentrokPengajuan = Pengajuan::query()
+      ->whereHas('jadwal', function ($query) use ($jadwal): void {
+        $query->where('dosen_id', $jadwal->dosen_id);
+      })
+      ->whereDate(
+        'tanggal_kelas_pengganti',
+        $tanggalKelasPengganti->toDateString()
+      )
+      ->whereIn('status', [
+        PengajuanStatus::Pending->value,
+        PengajuanStatus::Approved->value,
+      ])
+      ->where('jam_mulai', '<', $jamSelesaiValue)
+      ->where('jam_selesai', '>', $jamMulaiValue)
+      ->exists();
+
+    if ($bentrokPengajuan) {
+      throw ValidationException::withMessages([
+        'jam_mulai' => 'Dosen sudah memiliki pengajuan kelas pengganti pada tanggal dan jam tersebut.',
+      ]);
+    }
+  }
+
   /**
    * Menyimpan detail pengajuan ke MongoDB.
    *
@@ -406,6 +470,7 @@ final class PengajuanService
   ): void {
     PengajuanDetail::query()->create([
       'pengajuan_id' => $pengajuan->id,
+
       'lampiran' => $lampiranPath
         ? [[
           'path' => $lampiranPath,
@@ -414,13 +479,15 @@ final class PengajuanService
           'ukuran' => $lampiran?->getSize(),
         ]]
         : [],
+
       'riwayat_status' => [
         [
           'status' => PengajuanStatus::Pending->value,
           'waktu' => now()->toIso8601String(),
-          'catatan' => 'Pengajuan dibuat oleh mahasiswa.',
+          'catatan' => 'Pengajuan kelas pengganti dibuat oleh pengguna.',
         ],
       ],
+
       'activity_log' => [
         [
           'step' => 'validate-room',
@@ -431,6 +498,7 @@ final class PengajuanService
           'message' => 'Pengajuan kelas pengganti berhasil disimpan.',
         ],
       ],
+
       'metadata' => [
         'durasi_menit' => $durasiMenit,
         'jam_selesai' => $jamSelesai->format('H:i:s'),
@@ -461,8 +529,11 @@ final class PengajuanService
    *
    * Nama file dibuat unik agar tidak saling menimpa antar pengajuan.
    */
-  private function simpanLampiran(UploadedFile $lampiran, Mahasiswa $mahasiswa, Jadwal $jadwal): string
-  {
+  private function simpanLampiran(
+    UploadedFile $lampiran,
+    User $user,
+    Jadwal $jadwal
+  ): string {
     if (! $lampiran->isValid()) {
       throw ValidationException::withMessages([
         'lampiran' => 'Lampiran tidak valid atau gagal diunggah.',
@@ -470,10 +541,12 @@ final class PengajuanService
     }
 
     $ekstensi = $lampiran->getClientOriginalExtension();
-    $namaFile = Str::uuid()->toString() . ($ekstensi !== '' ? '.' . $ekstensi : '');
+
+    $namaFile = Str::uuid()->toString()
+      . ($ekstensi !== '' ? '.' . $ekstensi : '');
 
     return $lampiran->storeAs(
-      'pengajuan-lampiran/' . $mahasiswa->id . '/' . $jadwal->id,
+      'pengajuan-lampiran/' . $user->id . '/' . $jadwal->id,
       $namaFile,
       'public'
     );

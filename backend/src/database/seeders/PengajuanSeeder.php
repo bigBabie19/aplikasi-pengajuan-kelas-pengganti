@@ -41,12 +41,10 @@ final class PengajuanSeeder extends Seeder
     foreach ($configurations as $configuration) {
 
       Pengajuan::query()->updateOrCreate(
-
         [
-          'mahasiswa_id' => $mahasiswas[$configuration['mahasiswa']]->id,
+          'user_id' => $mahasiswas[$configuration['mahasiswa']]->user_id,
           'jadwal_id' => $jadwals[$configuration['kode_kelas']]->id,
         ],
-
         [
           'ruangan_id' => $ruangans[$configuration['ruangan']]->id,
           'tanggal_kelas_asal' => $configuration['tanggal_kelas_asal'],

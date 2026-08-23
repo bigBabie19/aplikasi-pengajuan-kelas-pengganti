@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 final class Pengajuan extends Model
 {
     protected $fillable = [
-        'mahasiswa_id',
+        'user_id',
         'jadwal_id',
         'ruangan_id',
         'tanggal_kelas_asal',
@@ -34,11 +34,11 @@ final class Pengajuan extends Model
     ];
 
     /**
-     * Relasi dengan model Mahasiswa.
+     * Relasi dengan model User.
      */
-    public function mahasiswa(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Mahasiswa::class);
+        return $this->belongsTo(User::class);
     }
 
     /**
