@@ -83,6 +83,16 @@ class PengajuanRemoteDatasource {
   Future<void> submitPengajuan(
     PengajuanRequestModel request,
   ) async {
+
+    print('=== ATTACHMENT REQUEST ===');
+    print('attachmentPath: ${request.attachmentPath}');
+
+    if (request.attachmentPath != null) {
+      print(
+        'file exists: ${File(request.attachmentPath!).existsSync()}',
+      );
+    }
+    
     final formData = FormData.fromMap({
       'jadwal_id': request.scheduleId,
       'ruangan_id': request.roomId,

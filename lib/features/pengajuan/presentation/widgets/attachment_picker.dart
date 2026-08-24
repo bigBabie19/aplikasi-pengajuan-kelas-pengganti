@@ -28,14 +28,20 @@ class AttachmentPicker extends ConsumerWidget {
     if (result == null) {
       return;
     }
+    
+
+    final filePath = result.files.single.path;
+
+    debugPrint('=== ATTACHMENT PICKER ===');
+    debugPrint('name: ${result.files.single.name}');
+    debugPrint('path: $filePath');
+    debugPrint('size: ${result.files.single.size}');
 
     ref
         .read(
           pengajuanFormViewModelProvider.notifier,
         )
-        .setAttachment(
-          result.files.single.path,
-        );
+        .setAttachment(filePath);
   }
 
   @override
